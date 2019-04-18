@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start"
+    "now-build": "next build",
+    "start": "NODE_ENV=production node server.js",
+    "start:port": "next start -p $PORT"
   },
   "repository": {
     "type": "git",
@@ -16,8 +18,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.16.4",
+    "isomorphic-unfetch": "^3.0.0",
     "next": "^8.1.0",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "react-markdown": "^4.0.8"
   }
 }
