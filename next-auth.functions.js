@@ -222,9 +222,6 @@ module.exports = () => {
         }   
       },
       signIn: ({form, req}) => {
-        console.log("######## HELLO ########")
-        console.log(form, req)
-        console.log("######## HELLO ########")
         return new Promise((resolve, reject) => {
           // Should validate credentials (e.g. hash password, compare 2FA token
           // etc) and return a valid user object from a database.
