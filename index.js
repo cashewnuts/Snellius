@@ -27,7 +27,7 @@ process.env.PORT = process.env.PORT || 80
 
 // Initialize Next.js
 const nextApp = next({
-  dir: '.',
+  dir: './app',
   dev: (process.env.NODE_ENV === 'development')
 })
 

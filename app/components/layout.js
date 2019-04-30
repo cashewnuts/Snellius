@@ -8,7 +8,7 @@ import { Container, Row, Col, Nav, NavItem, Button, Form, NavLink, Collapse,
 import Signin from './signin'
 import { NextAuth } from 'next-auth/client'
 import Cookies from 'universal-cookie'
-import Package from '../package'
+import Package from '../../package'
 import Styles from '../css/index.scss'
 
 export default class extends React.Component {

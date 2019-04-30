@@ -55,16 +55,22 @@ const nodemailerDirectTransport = require('nodemailer-direct-transport')
 
 // Send email direct from localhost if no mail server configured
 let nodemailerTransport = nodemailerDirectTransport()
-if (process.env.EMAIL_SERVER && process.env.EMAIL_USERNAME && process.env.EMAIL_PASSWORD) {
-  nodemailerTransport = nodemailerSmtpTransport({
-      host: process.env.EMAIL_SERVER,
-      port: process.env.EMAIL_PORT || 25,
+if (process.env.EMAIL_SERVER) {
+  let secureOptions = {};
+  if (process.env.EMAIL_USERNAME && process.env.EMAIL_PASSWORD) {
+    secureOptions = {
       secure: true,
       auth: {
         user: process.env.EMAIL_USERNAME,
         pass: process.env.EMAIL_PASSWORD
       }
-    })
+    };
+  }
+  nodemailerTransport = nodemailerSmtpTransport({
+      host: process.env.EMAIL_SERVER,
+      port: process.env.EMAIL_PORT || 25,
+      ...secureOptions,
+    });
 }
         
 module.exports = () => {
@@ -214,6 +220,30 @@ module.exports = () => {
         if (process.env.NODE_ENV === 'development')  {
           console.log('Generated sign in link ' + url + ' for ' + email)
         }   
+      },
+      signIn: ({form, req}) => {
+        console.log("######## HELLO ########")
+        console.log(form, req)
+        console.log("######## HELLO ########")
+        return new Promise((resolve, reject) => {
+          // Should validate credentials (e.g. hash password, compare 2FA token
+          // etc) and return a valid user object from a database.
+            return usersCollection.findOne({
+            email: form.email
+          }, (err, user) => {
+            if (err) return reject(err)
+            if (!user) return resolve(null)
+            
+            // Check credentials - e.g. compare bcrypt password hashes
+            if (form.password === "test1234") {
+              // If valid, return user object - e.g. { id, name, email }
+              return resolve(user)
+            } else {
+              // If invalid, return null
+              return resolve(null)
+            }
+          })
+        })
       },
     })
   })
