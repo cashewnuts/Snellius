@@ -10,18 +10,27 @@ export default class extends React.Component {
     super(props)
     this.state = {
       email: '',
+      password: '',
       session: this.props.session,
       providers: this.props.providers,
-      submitting: false
+      submitting: false,
+      alertText: '',
     }
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleEmailChange = this.handleEmailChange.bind(this)
+    this.handlePasswordChange = this.handlePasswordChange.bind(this)
     
   }
   
   handleEmailChange(event) {
     this.setState({
       email: event.target.value.trim()
+    })
+  }
+
+  handlePasswordChange(event) {
+    this.setState({
+      password: event.target.value.trim()
     })
   }
 
@@ -38,19 +47,36 @@ export default class extends React.Component {
     const cookies = new Cookies()
     cookies.set('redirect_url', window.location.pathname, { path: '/' })
 
-    NextAuth.signin(this.state.email)
-    .then(() => {
-      Router.push(`/auth/check-email?email=${this.state.email}`)
-    })
-    .catch(err => {
-      Router.push(`/auth/error?action=signin&type=email&email=${this.state.email}`)
-    })
+    if (this.props.signUp) {
+      NextAuth.signin(this.state.email)
+      .then(() => {
+        Router.push(`/auth/check-email?email=${this.state.email}`)
+      })
+      .catch(err => {
+        Router.push(`/auth/error?action=signin&type=email&email=${this.state.email}`)
+      })
+    } else {
+      NextAuth.signin({
+        email: this.state.email,
+        password: this.state.password,
+      })
+      .then(() => {
+        Router.push('/auth/callback')
+      })
+      .catch(err => {
+        this.setState({
+          alertText: 'Login failed',
+          submitting: false,
+        })
+      })
+    }
   }
   
   render() {
     if (this.props.session.user) {
       return(<div/>)
     } else {
+      const alert = (!this.state.alertText) ? <div/> : <div className={`alert alert-danger`} role="alert">{this.state.alertText}</div>
       return (
         <React.Fragment>
           <p className="text-center" style={{marginTop: 10, marginBottom: 30}}>{`If you don't have an account, one will be created when you sign in.`}</p>
@@ -59,16 +85,24 @@ export default class extends React.Component {
               <SignInButtons providers={this.props.providers}/>
             </Col>
             <Col xs={12} md={6}>
+              {alert}
               <Form id="signin" method="post" action="/auth/email/signin" onSubmit={this.handleSubmit}>
                 <Input name="_csrf" type="hidden" value={this.state.session.csrfToken}/>
                 <p>
                   <Label htmlFor="email">Email address</Label><br/>
                   <Input name="email" disabled={this.state.submitting} type="text" placeholder="j.smith@example.com" id="email" className="form-control" value={this.state.email} onChange={this.handleEmailChange}/>
                 </p>
+                {
+                  !this.props.signUp && 
+                  <p>
+                    <Label htmlFor="password">Password</Label><br/>
+                    <Input name="password" disabled={this.state.submitting} type="password" placeholder="" id="password" className="form-control" value={this.state.password} onChange={this.handlePasswordChange}/>
+                  </p>
+                }
                 <p className="text-right">
                   <Button id="submitButton" disabled={this.state.submitting} outline color="dark" type="submit">
                     {this.state.submitting === true && <span className="icon icon-spin ion-md-refresh mr-2"/>}
-                    Sign in with email
+                    { this.props.signUp ? "Sign up" : "Sign in" }
                   </Button>
                 </p>
               </Form>

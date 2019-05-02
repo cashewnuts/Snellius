@@ -29,12 +29,13 @@ export default class extends React.Component {
     this.state = {
       navOpen: false,
       modal: false,
-      providers: null
+      providers: null,
+      signUp: false,
     }
     this.toggleModal = this.toggleModal.bind(this)
   }
   
-  async toggleModal(e) {
+  async toggleModal(e, signUp = false) {
     if (e) e.preventDefault()
 
     // Save current URL so user is redirected back here after signing in
@@ -45,7 +46,8 @@ export default class extends React.Component {
 
     this.setState({
       providers: this.state.providers || await NextAuth.providers(),
-      modal: !this.state.modal
+      modal: !this.state.modal,
+      signUp: signUp
     })
   }
   
@@ -78,7 +80,7 @@ export default class extends React.Component {
         {/* Footer */}
         <Container fluid={this.props.fluid}>
         </Container>
-        <SigninModal modal={this.state.modal} toggleModal={this.toggleModal} session={this.props.session} providers={this.state.providers}/>
+        <SigninModal modal={this.state.modal} toggleModal={this.toggleModal} session={this.props.session} providers={this.state.providers} signUp={this.state.signUp}/>
       </React.Fragment>
     )
   }
@@ -191,12 +193,15 @@ export class UserMenu extends React.Component {
       return (
         <Nav className="ml-auto" navbar>
           <NavItem>
+            <a href="/auth?redirect=/" className="btn" onClick={(e) => this.props.toggleModal(e, false)}><span className="icon ion-md-log-in mr-1"></span>Sign in</a>
+          </NavItem>
+          <NavItem>
             {/**
               * @TODO Add support for passing current URL path as redirect URL
               * so that users without JavaScript are also redirected to the page
               * they were on before they signed in.
               **/}
-            <a href="/auth?redirect=/" className="btn btn-outline-primary" onClick={this.props.toggleModal}><span className="icon ion-md-log-in mr-1"></span> Sign up / Sign in</a>
+            <a href="/auth?redirect=/" className="btn btn-outline-primary" onClick={(e) => this.props.toggleModal(e, true)}><span className="icon ion-md-person-add mr-1"></span>Sign up</a>
           </NavItem>
         </Nav>
       )
@@ -223,12 +228,13 @@ export class AdminMenuItem extends React.Component {
 export class SigninModal extends React.Component {
   render() {
     if (this.props.providers === null) return null
+    let title = this.props.signUp ? 'Sign up' : 'Sign in' ;
     
     return (
       <Modal isOpen={this.props.modal} toggle={this.props.toggleModal} style={{maxWidth: 700}}>
-        <ModalHeader>Sign up / Sign in</ModalHeader>
+        <ModalHeader>{title}</ModalHeader>
         <ModalBody style={{padding: '1em 2em'}}>
-          <Signin session={this.props.session} providers={this.props.providers}/>
+          <Signin session={this.props.session} providers={this.props.providers} signUp={this.props.signUp}/>
         </ModalBody>
       </Modal>
     )
