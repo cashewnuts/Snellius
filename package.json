@@ -38,6 +38,8 @@
     "passport-google-oauth": "^2.0.0",
     "passport-twitter": "^1.0.4",
     "popper.js": "^1.14.6",
+    "pusher": "^2.2.0",
+    "pusher-js": "^4.4.0",
     "raw-loader": "^2.0.0",
     "react": "^16.7.0",
     "react-bootstrap-table": "^4.3.1",
@@ -46,6 +48,7 @@
     "react-transition-group": "^4.0.0",
     "reactstrap": "^8.0.0",
     "sass-loader": "^7.1.0",
+    "simple-peer": "^9.3.0",
     "universal-cookie": "^3.0.7"
   },
   "devDependencies": {
