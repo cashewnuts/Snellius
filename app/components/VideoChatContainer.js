@@ -4,6 +4,7 @@ import MediaHandler from '../helper/MediaHandler'
 import fetch from 'isomorphic-fetch'
 import Pusher from 'pusher-js'
 import Peer from 'simple-peer';
+import zlib from 'zlib'
 
 export default class VideoChatContainer extends Page {
 
@@ -13,6 +14,7 @@ export default class VideoChatContainer extends Page {
     this.state = {
       hasMedia: false,
       otherUserId: null,
+      users: [],
     }
 
     this.user = this.props.session.user
@@ -23,7 +25,19 @@ export default class VideoChatContainer extends Page {
 
     this.setupPusher = this.setupPusher.bind(this)
     this.startPeer = this.startPeer.bind(this)
-    this.callTo = this.callTo.bind(this)
+  }
+
+  propagateUser(initiator = true) {
+    let myId = this.getUser().id
+    const chatRoom = `client-chatroom-${this.getChannelName()}`
+
+    setTimeout(() => {
+      console.log(this, chatRoom)
+      this.channel.trigger(chatRoom, {
+        initiator: initiator,
+        userId: myId,
+      })
+    }, 1000)
   }
 
   async componentDidMount() {
@@ -44,6 +58,16 @@ export default class VideoChatContainer extends Page {
     }
 
     this.setupPusher()
+  }
+
+  componentWillUnmount() {
+    for (let key in this.peers) {
+      this.peers[key].destroy()
+    }
+    this.setState({
+      users: [],
+      peers: {},
+    })
   }
 
   async setupPusher() {
@@ -73,17 +97,50 @@ export default class VideoChatContainer extends Page {
 
     this.channel = this.pusher.subscribe('presence-video-channel');
 
-    this.channel.bind(`client-signal-${this.getChannelName()}`, (signal) => {
+    let myId = this.getUser().id
+    this.channel.bind(`client-signal-${myId}`, (signal) => {
 
-      let peer = this.peers[signal.chName];
+      let peer = this.peers[signal.userId];
 
       // if peer is not already exists, we got an incoming call
       if (!peer) {
-        this.setState({otherUserId: signal.chName});
-        peer = this.startPeer(signal.chName+'', false);
+        this.setState({otherUserId: signal.userId});
+        peer = this.startPeer(signal.userId+'', false);
       }
-      peer.signal(signal.data);
+
+      zlib.inflate(new Buffer(signal.data, 'base64'), (err, buf) => {
+        if (err) console.error(err)
+        let inflated = JSON.parse(buf)
+        if (!peer.destroyed) {
+          peer.signal(inflated);
+        }
+      })
     });
+
+    this.channel.bind(`client-chatroom-${this.getChannelName()}`, (data, metadata) => {
+      let { users } = this.state
+      let { initiator, userId } = data
+      let myId = this.getUser().id
+      if (userId === myId) {
+        return
+      }
+      if (!this.peers[userId]) {
+      // if (true) {
+        users.push(userId)
+        this.setState({users: users})
+        if (initiator) {
+          this.peers[userId] = this.startPeer(userId);
+        } else {
+          this.propagateUser(myId > userId)
+        }
+      }
+    })
+
+    this.propagateUser(false)
+  }
+
+  getUser() {
+    return this.props.session.user
   }
 
   getChannelName() {
@@ -91,7 +148,7 @@ export default class VideoChatContainer extends Page {
     return channelName
   }
 
-  startPeer(chName, initiator = true) {
+  startPeer(userId, initiator = true) {
     const peer = new Peer({
       initiator,
       stream: this.user.stream,
@@ -99,12 +156,18 @@ export default class VideoChatContainer extends Page {
     });
 
     peer.on('signal', (data) => {
-      this.channel.trigger(`client-signal-${chName}`, {
-        type: 'signal',
-        chName: this.getChannelName(),
-        email: this.props.session.user.email,
-        data: data
-      });
+      var input = "Hellow world";
+
+      zlib.deflate(JSON.stringify(data), (err, buf) => {
+        if (err) console.error(err)
+        let deflated = buf.toString('base64')
+        this.channel.trigger(`client-signal-${userId}`, {
+          type: 'signal',
+          userId: this.getUser().id,
+          email: this.getUser().email,
+          data: deflated
+        });
+      })
     });
 
     peer.on('stream', (stream) => {
@@ -118,26 +181,20 @@ export default class VideoChatContainer extends Page {
     });
 
     peer.on('close', () => {
-      let peer = this.peers[chName];
+      let peer = this.peers[userId];
       if(peer !== undefined) {
         peer.destroy();
       }
 
-      this.peers[chName] = undefined;
+      this.peers[userId] = undefined;
     });
 
     return peer;
   }
 
-  callTo(chName) {
-    this.peers[chName] = this.startPeer(chName+'');
-  }
-
   render() {
     return (
       <div className="container">
-        <button onClick={(e) => this.callTo("1")}>Call To 1</button>
-        <button onClick={(e) => this.callTo("2")}>Call To 2</button>
         <div className="video-container">
           <video className="user-video" ref={(ref) => {this.userVideo = ref;}}></video>
           <video className="my-video" ref={(ref) => {this.myVideo = ref;}}></video>
