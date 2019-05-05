@@ -27,7 +27,7 @@ export default class VideoChatContainer extends Page {
   }
 
   propagateUser(initiator = true) {
-    let myId = this.getUser().id
+    let myId = this.user.id
     const chatRoom = `client-chatroom-${this.getChannelName()}`
 
     setTimeout(() => {
@@ -91,7 +91,7 @@ export default class VideoChatContainer extends Page {
 
     this.channel = this.pusher.subscribe('presence-video-channel');
 
-    let myId = this.getUser().id
+    let myId = this.user.id
     this.channel.bind(`client-signal-${myId}`, (signal) => {
 
       let users = this.state.users
@@ -120,7 +120,7 @@ export default class VideoChatContainer extends Page {
     this.channel.bind(`client-chatroom-${this.getChannelName()}`, (data, metadata) => {
       let { users } = this.state
       let { initiator, userId } = data
-      let myId = this.getUser().id
+      let myId = this.user.id
       if (userId === myId) {
         return
       }
@@ -142,10 +142,6 @@ export default class VideoChatContainer extends Page {
     this.propagateUser(false)
   }
 
-  getUser() {
-    return this.props.session.user
-  }
-
   getChannelName() {
     const channelName = this.props.channel ? this.props.channel + '' : 'undefined';
     return channelName
@@ -165,8 +161,8 @@ export default class VideoChatContainer extends Page {
         let deflated = buf.toString('base64')
         this.channel.trigger(`client-signal-${userId}`, {
           type: 'signal',
-          userId: this.getUser().id,
-          email: this.getUser().email,
+          userId: this.user.id,
+          email: this.user.email,
           data: deflated
         });
       })
