@@ -19,7 +19,6 @@ export default class VideoChatContainer extends Page {
 
     this.user = this.props.session.user
     this.user.stream = null
-    this.peers = {}
 
     this.mediaHandler = new MediaHandler()
 
@@ -32,7 +31,6 @@ export default class VideoChatContainer extends Page {
     const chatRoom = `client-chatroom-${this.getChannelName()}`
 
     setTimeout(() => {
-      console.log(this, chatRoom)
       this.channel.trigger(chatRoom, {
         initiator: initiator,
         userId: myId,
@@ -61,12 +59,8 @@ export default class VideoChatContainer extends Page {
   }
 
   componentWillUnmount() {
-    for (let key in this.peers) {
-      this.peers[key].destroy()
-    }
     this.setState({
       users: [],
-      peers: {},
     })
   }
 
@@ -100,17 +94,23 @@ export default class VideoChatContainer extends Page {
     let myId = this.getUser().id
     this.channel.bind(`client-signal-${myId}`, (signal) => {
 
-      let peer = this.peers[signal.userId];
+      let users = this.state.users
+      let user = users.find(u => u.id === signal.userId)
 
       // if peer is not already exists, we got an incoming call
-      if (!peer) {
-        this.setState({otherUserId: signal.userId});
-        peer = this.startPeer(signal.userId+'', false);
+      if (!user) {
+        user = {
+          id: signal.userId,
+          peer: this.startPeer(signal.userId+'', false),
+        }
+        users.push(user)
+        this.setState({users: users});
       }
 
       zlib.inflate(new Buffer(signal.data, 'base64'), (err, buf) => {
         if (err) console.error(err)
         let inflated = JSON.parse(buf)
+        let peer = user.peer
         if (!peer.destroyed) {
           peer.signal(inflated);
         }
@@ -124,12 +124,15 @@ export default class VideoChatContainer extends Page {
       if (userId === myId) {
         return
       }
-      if (!this.peers[userId]) {
-      // if (true) {
-        users.push(userId)
-        this.setState({users: users})
+      let user = users.find(u => u.id === userId)
+      if (!user) {
         if (initiator) {
-          this.peers[userId] = this.startPeer(userId);
+          user = {
+            id: userId,
+            peer: this.startPeer(userId),
+          }
+          users.push(user)
+          this.setState({users: users})
         } else {
           this.propagateUser(myId > userId)
         }
@@ -156,7 +159,6 @@ export default class VideoChatContainer extends Page {
     });
 
     peer.on('signal', (data) => {
-      var input = "Hellow world";
 
       zlib.deflate(JSON.stringify(data), (err, buf) => {
         if (err) console.error(err)
@@ -170,25 +172,6 @@ export default class VideoChatContainer extends Page {
       })
     });
 
-    peer.on('stream', (stream) => {
-      if ('srcObject' in this.userVideo) {
-        this.userVideo.srcObject = stream
-      } else {
-        this.userVideo.src = URL.createObjectURL(stream) // for older browsers
-      }
-
-      this.userVideo.play();
-    });
-
-    peer.on('close', () => {
-      let peer = this.peers[userId];
-      if(peer !== undefined) {
-        peer.destroy();
-      }
-
-      this.peers[userId] = undefined;
-    });
-
     return peer;
   }
 
@@ -196,10 +179,52 @@ export default class VideoChatContainer extends Page {
     return (
       <div className="container">
         <div className="video-container">
-          <video className="user-video" ref={(ref) => {this.userVideo = ref;}}></video>
           <video className="my-video" ref={(ref) => {this.myVideo = ref;}}></video>
+          {
+            this.state.users.map(user => <VideoChatter key={user.id} {...user} />)
+          }
         </div>
       </div>
+    )
+  }
+}
+
+class VideoChatter extends Component{
+
+  constructor(props) {
+    super(props)
+
+    this.setOnPeer()
+  }
+
+  componentWillUnmount() {
+    this.props.peer.destroy()
+  }
+
+  setOnPeer() {
+    const peer = this.props.peer
+
+    peer.on('stream', (stream) => {
+      if ('srcObject' in this.videoRef) {
+        this.videoRef.srcObject = stream
+      } else {
+        this.videoRef.src = URL.createObjectURL(stream) // for older browsers
+      }
+
+      this.videoRef.play();
+    });
+
+    peer.on('close', () => {
+      let peer = this.props.peer
+      if(peer !== undefined) {
+        peer.destroy();
+      }
+    });
+  }
+
+  render() {
+    return (
+      <video ref={(ref) => {this.videoRef = ref}} ></video>
     )
   }
 }
