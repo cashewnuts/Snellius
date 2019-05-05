@@ -66,7 +66,7 @@ nextApp
   // Video chat custom routing
   expressApp.get('/video-chat/:channel', (req, res) => {
     const actualPage = '/video-chat'
-    const queryParams = { slug: req.params.channel }
+    const queryParams = { channel: req.params.channel }
     return nextApp.render(req, res, actualPage, queryParams)
   })
   
