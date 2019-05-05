@@ -64,9 +64,9 @@ nextApp
   expressApp.use('/fonts/ionicons', express.static('./node_modules/ionicons/dist/fonts'))
   
   // Video chat custom routing
-  expressApp.get('/video-chat/:channel', (req, res) => {
+  expressApp.get('/video-chat/*', (req, res) => {
     const actualPage = '/video-chat'
-    const queryParams = { channel: req.params.channel }
+    const queryParams = { channel: req.params[0] }
     return nextApp.render(req, res, actualPage, queryParams)
   })
   
