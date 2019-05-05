@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic'
-import Layout from '../../components/MyLayout.js'
+import Layout from '../../components/layout.js'
 import Page from '../../components/page'
 const VideoChatContainer = dynamic(() => import('../../components/VideoChatContainer'))
 
@@ -16,8 +16,7 @@ export default class extends Page {
       return this.loggedInAccessOnly()
 
     return (
-      <Layout>
-        <h1>My Blog</h1>
+      <Layout {...this.props} navmenu={false} container={false}>
         <VideoChatContainer channel={this.props.channel} session={this.props.session}/>
       </Layout>
     )
