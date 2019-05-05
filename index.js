@@ -63,12 +63,11 @@ nextApp
   // Serve fonts from ionicon npm module
   expressApp.use('/fonts/ionicons', express.static('./node_modules/ionicons/dist/fonts'))
   
-  // A simple example of custom routing
-  // Send requests for '/custom-route/{anything}' to 'pages/examples/routing.js'
-  expressApp.get('/custom-route/:id', (req, res) => {
-    // Note: To make capturing a slug easier when rendering both client
-    // and server side, name it ':id'
-    return nextApp.render(req, res, '/examples/routing', req.params)
+  // Video chat custom routing
+  expressApp.get('/video-chat/:channel', (req, res) => {
+    const actualPage = '/video-chat'
+    const queryParams = { slug: req.params.channel }
+    return nextApp.render(req, res, actualPage, queryParams)
   })
   
   // Default catch-all handler to allow Next.js to handle all other routes
