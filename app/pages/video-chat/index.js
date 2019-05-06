@@ -25,7 +25,7 @@ export default class extends Page {
       return this.loggedInAccessOnly()
 
     return (
-      <Layout {...this.props} navmenu={false} container={false}>
+      <Layout {...this.props} navmenu={false} container={true} fluid={true}>
         <h1>{this.state.channel} Room</h1>
         <VideoChatContainer channel={this.state.channel} session={this.props.session}/>
         <style jsx>{`
