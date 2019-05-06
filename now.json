@@ -1,4 +1,18 @@
 {
   "version": 2,
-  "builds": [{ "src": "package.json", "use": "@now/next" }]
+  "env": {
+    "MONGO_URI": "@snellius-mongo-uri",
+    "FACEBOOK_ID": "@snellius-facebook-id",
+    "FACEBOOK_SECRET": "@snellius-facebook-secret",
+    "GOOGLE_ID": "@snellius-google-id",
+    "GOOGLE_SECRET": "@snellius-google-secret",
+    "PUSHER_APP_KEY": "@snellius-pusher-app-key",
+    "PUSHER_APP_ID": "@snellius-pusher-app-id",
+    "PUSHER_APP_SECRET": "@snellius-pusher-app-secret",
+    "PUSHER_APP_CLUSTER": "@snellius-pusher-app-cluster"
+  },
+  "builds": [
+    { "src": "index.js", "use": "@now/node-server" },
+    { "src": "app/static/*", "use": "@now/static" }
+  ]
 }
