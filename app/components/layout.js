@@ -57,11 +57,11 @@ export default class extends React.Component {
         <Head>
           <meta charSet="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1"/>
-          <title>{this.props.title || 'Next.js Starter Project'}</title>
+          <title>{this.props.title ? `${this.props.tile} || ${Package.name}` : Package.name }</title>
           <style dangerouslySetInnerHTML={{__html: Styles}}/>
           <script src="https://cdn.polyfill.io/v2/polyfill.min.js"/>
         </Head>
-        <Navbar light className="navbar navbar-expand-md pt-3 pb-3">
+        <Navbar light className="navbar navbar-expand-md sn-navbar">
           <Link prefetch href="/">
             <NavbarBrand href="/">
               <span className="icon ion-md-home mr-1"></span> {Package.name}

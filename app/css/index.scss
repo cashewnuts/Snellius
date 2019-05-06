@@ -6,6 +6,16 @@ $ionicons-version: "3.0.0-alpha.3" !default;
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
 @import "../../node_modules/react-bootstrap-table/dist/react-bootstrap-table-all.min";
 @import "nojs-menus.scss";
+@import "channel-form.scss";
+
+html,
+body {
+  height: 100%;
+}
+
+#__next {
+  height: inherit;
+}
 
 .lead {
   font-size: 1.4em;
@@ -28,6 +38,10 @@ pre {
 
 .navbar {
   border-bottom: 1px solid #ddd;
+}
+
+.sn-navbar {
+  max-height: 10vh;
 }
 
 @media (max-width: 768px) {

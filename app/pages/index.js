@@ -38,37 +38,19 @@ export default class extends Page {
       // When logged in
       return (
         <Layout {...this.props} navmenu={false} container={false}>
-          <div className="form-container">
-            <Form className="channel-form" onSubmit={(e) => this.moveToChannel(e)}>
-              <h1>Select Channel Name</h1>
-              <FormGroup>
-                <div className="channel-name-group">
-                  <Input onInput={(e) => this.inputChannelName(e)} ></Input>
-                  <button size="sm" className="btn btn-outline-primary icon ion-md-pulse ph-auto pw-auto"></button>
-                </div>
-              </FormGroup>
-            </Form>
-          </div>
-          <style jsx>{`
-          .form-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: auto;
-            height: 80vh;
-          }
-          .channel-form {
-            width: 80vh;
-          }
-          .channel-name-group {
-            position: relative;
-          }
-          .channel-name-group button {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-          }
-          `}</style>
+          <Row className="channel-form-container">
+            <Col className="" sm="12" md="8" lg="6" xl="5">
+              <Form className="channel-form" onSubmit={(e) => this.moveToChannel(e)}>
+                <h1>Select Channel Name</h1>
+                <FormGroup>
+                  <div className="channel-name-group">
+                    <Input onInput={(e) => this.inputChannelName(e)} ></Input>
+                    <button size="sm" className="btn btn-outline-primary icon ion-md-pulse ph-auto pw-auto"></button>
+                  </div>
+                </FormGroup>
+              </Form>
+            </Col>
+          </Row>
         </Layout>
       )
     } else {
