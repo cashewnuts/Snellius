@@ -1,0 +1,45 @@
+.id-top-container {
+  display: flex;
+  flex-direction: row;
+}
+.id-img-container,
+.id-description {
+  width: 50%;
+}
+.id-img-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30em;
+
+  img {
+    height: auto;
+    max-width:100%;
+    max-height:100%;
+  }
+}
+.id-description {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  h1 {
+    font-family: Sofia;
+    text-align: center;
+    font-size: 50px;
+  }
+  p {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 767px) {
+  .id-top-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .id-img-container,
+  .id-description {
+    width: auto;
+  }
+}

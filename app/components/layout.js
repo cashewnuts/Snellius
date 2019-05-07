@@ -10,7 +10,9 @@ import { NextAuth } from 'next-auth/client'
 import Cookies from 'universal-cookie'
 import Package from '../../package'
 import Styles from '../css/index.scss'
+import _ from 'lodash'
 
+const packageName = _.startCase(Package.name)
 export default class extends React.Component {
 
   static propTypes() {
@@ -57,14 +59,14 @@ export default class extends React.Component {
         <Head>
           <meta charSet="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1"/>
-          <title>{this.props.title ? `${this.props.tile} || ${Package.name}` : Package.name }</title>
+          <title>{this.props.title ? `${this.props.tile} || ${packageName}` : packageName }</title>
           <style dangerouslySetInnerHTML={{__html: Styles}}/>
           <script src="https://cdn.polyfill.io/v2/polyfill.min.js"/>
         </Head>
         <Navbar light className="navbar navbar-expand-md sn-navbar">
           <Link prefetch href="/">
             <NavbarBrand href="/">
-              <span className="icon ion-md-home mr-1"></span> {Package.name}
+              <span className="icon ion-md-home mr-1"></span> {packageName}
             </NavbarBrand>
           </Link>
           <input className="nojs-navbar-check" id="nojs-navbar-check" type="checkbox" aria-label="Menu"/>
